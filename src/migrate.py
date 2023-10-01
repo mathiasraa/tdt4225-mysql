@@ -8,17 +8,13 @@ from utils.connection import MySQLConnector
 from tabulate import tabulate
 
 
-def create_user_table():
+def create_user_table(cursor, db_connection):
     """
     Creates 'UserTable' SQL table with two columns:
     - 'id' (VARCHAR(3))
     - 'has_label' (TINYINT)
 
     """
-
-    connection = MySQLConnector()
-    cursor = connection.cursor
-    db_connection = connection.db_connection
 
     # Create table
     table_name = "UserTable"
@@ -46,9 +42,6 @@ def create_user_table():
     cursor.executemany(insert_query, data_to_insert)
     db_connection.commit()
 
-    # Close connection
-    connection.close_connection()
-
 
 def create_track_point_table():
     """
@@ -67,7 +60,14 @@ def create_track_point_table():
 def migrate():
     print("Migrating...")
 
-    create_user_table()
+    connection = MySQLConnector()
+    cursor = connection.cursor
+    db_connection = connection.db_connection
+
+    create_user_table(cursor, db_connection)
+
+    # Close connection
+    connection.close_connection()
 
 
 if __name__ == "__main__":
