@@ -9,16 +9,35 @@ data = []
 
 
 def get_user_ids():
+    """Returns a list of the user ids
+
+    Returns:
+        list[str]
+    """
     return [f.name for f in os.scandir(data_path) if f.is_dir()]
 
 
 def get_labeled_ids():
+    """Returns a list of the user ids that have labeled activities
+
+    Returns:
+        list[str]
+    """
+
     lines = loadtxt(f"{dir_path}/../../data/labeled_ids.txt", dtype=str)
 
-    return lines
+    return list(lines)
 
 
-def get_activities_df(user_id):
+def get_activities_df(user_id: str):
+    """Returns a DataFrame of the activities of a user_id
+
+    Arguments:
+        user_id {string} -- The id of the user
+
+    Returns:
+        DataFrame
+    """
     for _, _, files in os.walk(f"{data_path}/{user_id}/Trajectory"):
         activities = pd.DataFrame(
             columns=[
@@ -57,7 +76,15 @@ def get_activities_df(user_id):
         return activities
 
 
-def get_trajectories_df(user_id):
+def get_trajectories_df(user_id: str):
+    """Returns a DataFrame of the trajectories of a user_id
+
+    Arguments:
+        user_id {string} -- The id of the user
+
+    Returns:
+        DataFrame
+    """
     for _, _, files in os.walk(f"{data_path}/{user_id}/Trajectory"):
         trajectories = pd.DataFrame(
             columns=["latitude", "longitude", "altitude", "date_time", "activity_id"]
@@ -111,7 +138,3 @@ def get_trajectories_df(user_id):
         trajectories = pd.concat(selected_trajectories)
         trajectories = trajectories.reset_index(drop=True)
         return trajectories
-
-
-def load_data():
-    """Load data from the dataset"""
