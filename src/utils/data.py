@@ -14,6 +14,7 @@ def get_user_ids():
     Returns:
         list[str]
     """
+
     return [f.name for f in os.scandir(data_path) if f.is_dir()]
 
 
@@ -38,40 +39,45 @@ def get_activities_df(user_id: str):
     Returns:
         DataFrame
     """
-    for _, _, files in os.walk(f"{data_path}/{user_id}/Trajectory"):
-        activities = pd.DataFrame(
-            columns=[
-                "start_date_time",
-                "end_date_time",
-                "transportation_mode",
-                "user_id",
-                "id",
-            ]
+
+    # Create an empty DataFrame to store the activities
+    activities = pd.DataFrame(
+        columns=[
+            "start_date_time",
+            "end_date_time",
+            "transportation_mode",
+            "user_id",
+            "id",
+        ]
+    )
+
+    # Check if the user has labeled activities
+    if user_id in get_labeled_ids():
+        # Read the labels.txt file into a DataFrame
+        activities[
+            ["start_date_time", "end_date_time", "transportation_mode"]
+        ] = loadtxt(
+            f"{data_path}/{user_id}/labels.txt",
+            skiprows=1,
+            delimiter="\t",
+            dtype=str,
         )
 
-        if user_id in get_labeled_ids():
-            activities[
-                ["start_date_time", "end_date_time", "transportation_mode"]
-            ] = loadtxt(
-                f"{data_path}/{user_id}/labels.txt",
-                skiprows=1,
-                delimiter="\t",
-                dtype=str,
-            )
-            activities["user_id"] = user_id
-            activities["start_date_time"] = pd.to_datetime(
-                activities["start_date_time"], format="%Y/%m/%d %H:%M:%S"
-            )
-            activities["end_date_time"] = pd.to_datetime(
-                activities["end_date_time"], format="%Y/%m/%d %H:%M:%S"
-            )
-            activities["id"] = (
-                activities["start_date_time"]
-                .astype(str)
-                .str.replace("-", "")
-                .str.replace(" ", "")
-                .str.replace(":", "")
-            )
+        # Clean columns
+        activities["user_id"] = user_id
+        activities["start_date_time"] = pd.to_datetime(
+            activities["start_date_time"], format="%Y/%m/%d %H:%M:%S"
+        )
+        activities["end_date_time"] = pd.to_datetime(
+            activities["end_date_time"], format="%Y/%m/%d %H:%M:%S"
+        )
+        activities["id"] = (
+            activities["start_date_time"]
+            .astype(str)
+            .str.replace("-", "")
+            .str.replace(" ", "")
+            .str.replace(":", "")
+        )
 
         return activities
 
@@ -85,17 +91,20 @@ def get_trajectories_df(user_id: str):
     Returns:
         DataFrame
     """
+
     for _, _, files in os.walk(f"{data_path}/{user_id}/Trajectory"):
+        # Create an empty DataFrame to store the trajectories
         trajectories = pd.DataFrame(
             columns=["latitude", "longitude", "altitude", "date_time", "activity_id"]
         )
         activities = get_activities_df(user_id)
 
+        # Check if the user has labeled activities
         if activities.empty:
             return trajectories
 
+        # Loop through the files in the Trajectory folder
         for name in files:
-            # if activity_id == name.split(".")[0]:
             trajectory = pd.read_csv(
                 f"{data_path}/{user_id}/Trajectory/{name}",
                 names=[
@@ -137,4 +146,5 @@ def get_trajectories_df(user_id: str):
         # Concatenate the selected trajectories into a single DataFrame
         trajectories = pd.concat(selected_trajectories)
         trajectories = trajectories.reset_index(drop=True)
+
         return trajectories

@@ -1,4 +1,4 @@
-from src.utils.data_load import get_trajectories_df, get_user_ids
+from utils.data import get_trajectories_df, get_user_ids
 
 from DbConnector import DbConnector
 from tabulate import tabulate

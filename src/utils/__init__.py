@@ -1,4 +1,4 @@
-from .data_load import (
+from .data import (
     get_trajectories_df,
     get_user_ids,
     get_activities_df,
