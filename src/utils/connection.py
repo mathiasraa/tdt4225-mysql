@@ -4,14 +4,7 @@ import mysql.connector as mysql
 class MySQLConnector:
     """
     Connects to the MySQL server on the Ubuntu virtual machine.
-    Connector needs HOST, DATABASE, USER and PASSWORD to connect,
-    while PORT is optional and should be 3306.
-
-    Example:
-    HOST = "tdt4225-00.idi.ntnu.no" // Your server IP address/domain name
-    DATABASE = "testdb" // Database name, if you just want to connect to MySQL server, leave it empty
-    USER = "testuser" // This is the user you created and added privileges for
-    PASSWORD = "test123" // The password you set for said user
+    Connector needs HOST, DATABASE, USER and PASSWORD to connect.
     """
 
     def __init__(
