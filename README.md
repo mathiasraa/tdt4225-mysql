@@ -17,4 +17,4 @@ This assignment looks at an open dataset of trajectories, and the repository con
 2. Add the dataset from Blackboard to the `data` folder
 3. Run `docker-compose up --build` in the root directory
 4. Install the requirements with `pip install -r requirements.txt`
-5. Run `migrate.py` to migrate the dataset to the database
+5. Run `src/migrate.py` to migrate the dataset to the database
