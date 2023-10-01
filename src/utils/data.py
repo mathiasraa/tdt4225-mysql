@@ -79,7 +79,7 @@ def get_activities_df(user_id: str):
             .str.replace(":", "")
         )
 
-        return activities
+    return activities
 
 
 def get_trajectories_df(user_id: str):

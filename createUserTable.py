@@ -1,4 +1,4 @@
-from utils.data import get_trajectories_df, get_user_ids, get_labeled_ids
+from src.utils.data import get_trajectories_df, get_user_ids, get_labeled_ids, get_activities_df
 
 from DbConnector import DbConnector
 from tabulate import tabulate
@@ -32,10 +32,11 @@ insert_query = f"INSERT INTO {table_name} (id, has_label) VALUES (%s, %s)"
 cursor.executemany(insert_query, data_to_insert)
 db_connection.commit()
 
-
+'''
 print(f"{table_name} Contents")
 cursor.execute(f"SELECT * FROM {table_name}")
 rows = cursor.fetchall()
 print(tabulate(rows, headers=cursor.column_names))
+'''
 
 connection.close_connection()
