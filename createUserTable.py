@@ -7,7 +7,6 @@ connection = DbConnector()
 cursor = connection.cursor
 db_connection = connection.db_connection
 
-# Using "UserTable" as the table name
 table_name = "UserTable"
 
 query = f"""
@@ -32,11 +31,11 @@ insert_query = f"INSERT INTO {table_name} (id, has_label) VALUES (%s, %s)"
 cursor.executemany(insert_query, data_to_insert)
 db_connection.commit()
 
-'''
+
 print(f"{table_name} Contents")
 cursor.execute(f"SELECT * FROM {table_name}")
 rows = cursor.fetchall()
 print(tabulate(rows, headers=cursor.column_names))
-'''
+
 
 connection.close_connection()
