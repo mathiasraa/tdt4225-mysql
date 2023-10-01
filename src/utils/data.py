@@ -71,12 +71,9 @@ def get_activities_df(user_id: str):
         activities["end_date_time"] = pd.to_datetime(
             activities["end_date_time"], format="%Y/%m/%d %H:%M:%S"
         )
-        activities["id"] = (
-            activities["start_date_time"]
-            .astype(str)
-            .str.replace("-", "")
-            .str.replace(" ", "")
-            .str.replace(":", "")
+        activities.reset_index(drop=True, inplace=True)
+        activities["id"] = ("1" + activities.index.astype(str) + user_id + "1").astype(
+            int
         )
 
     return activities
