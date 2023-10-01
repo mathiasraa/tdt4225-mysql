@@ -1,24 +1,13 @@
-version: '2'
+version: "3.9"
 services:
-  db:
-    image: mysql:8.0
+  mysql:
+    restart: always
+    container_name: "mysql"
+    image: mysql:8.1.0
+    ports:
+      - 3306:3306
     environment:
       - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_ALLOW_EMPTY_PASSWORD='yes'
-    volumes:
-      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./db/mysql_data:/var/lib/mysql
-    container_name: 'mysql-8.0'
-    ports:
-      - '3306:3306'
-    restart: always
-
-  python3:
-    restart: always
-    build: .
-    container_name: 'python3.8'
-    tty: true
-    volumes:
-      - .:/code
-    links:
-      - db 
+      - MYSQL_DATABASE=mysql
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
