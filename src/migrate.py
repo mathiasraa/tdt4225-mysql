@@ -6,7 +6,6 @@ def migrate():
     print("Migrating...")
 
     trajectories = get_trajectories_df("000")
-    createUserTable()
 
 def createUserTable():
     """Creates 'UserTable' SQL table with two columns['id' (VARCHAR(3)), 'has_label' (TINYINT)]
@@ -49,3 +48,4 @@ def createUserTable():
 
 if __name__ == "__main__":
     migrate()
+    createUserTable()
