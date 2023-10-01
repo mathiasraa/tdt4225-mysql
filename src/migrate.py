@@ -80,7 +80,7 @@ def create_activity_table(cursor: MySQLCursor, db_connection: MySQLConnection):
     for user in user_ids:
         activities_df = get_activities_df(user)
 
-        for index, row in activities_df.iterrows():
+        for _, row in activities_df.iterrows():
             data_to_insert.append(
                 (
                     row["id"],
@@ -93,7 +93,8 @@ def create_activity_table(cursor: MySQLCursor, db_connection: MySQLConnection):
 
     insert_query = f"""
         INSERT INTO {table_name} (id, user_id, start_date_time, end_date_time, transportation_mode)
-        VALUES (%s, %s, %s, %s, %s)"""
+        VALUES (%s, %s, %s, %s, %s)
+    """
 
     cursor.executemany(insert_query, data_to_insert)
     db_connection.commit()
@@ -136,7 +137,7 @@ def create_track_point_table(cursor: MySQLCursor, db_connection: MySQLConnection
     for user in user_ids:
         trajectories_df = get_trajectories_df(user)
 
-        for index, row in trajectories_df.iterrows():
+        for _, row in trajectories_df.iterrows():
             data_to_insert.append(
                 (
                     row["activity_id"],
@@ -147,7 +148,10 @@ def create_track_point_table(cursor: MySQLCursor, db_connection: MySQLConnection
                 )
             )
 
-    insert_query = f"INSERT INTO {table_name} (activity_id, lat, lon, altitude, date_time) VALUES (%s, %s, %s, %s, %s)"
+    insert_query = f"""
+        INSERT INTO {table_name} (activity_id, lat, lon, altitude, date_time)
+        VALUES (%s, %s, %s, %s, %s)
+    """
     cursor.executemany(insert_query, data_to_insert)
     db_connection.commit()
 
