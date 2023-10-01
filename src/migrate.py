@@ -1,21 +1,27 @@
-from utils.data import get_trajectories_df, get_user_ids, get_labeled_ids, get_activities_df
+from utils.data import (
+    get_trajectories_df,
+    get_user_ids,
+    get_labeled_ids,
+    get_activities_df,
+)
 from utils.connection import MySQLConnector
 from tabulate import tabulate
 
-def migrate():
-    print("Migrating...")
 
-    trajectories = get_trajectories_df("000")
-    createUserTable()
-
-def createUserTable():
-    """Creates 'UserTable' SQL table with two columns['id' (VARCHAR(3)), 'has_label' (TINYINT)]
-    
+def create_user_table():
     """
+    Creates 'UserTable' SQL table with two columns:
+    - 'id' (VARCHAR(3))
+    - 'has_label' (TINYINT)
+
+    """
+
     connection = MySQLConnector()
     cursor = connection.cursor
     db_connection = connection.db_connection
-    table_name = "UserTable" #defines the name of the table
+
+    # Create table
+    table_name = "UserTable"
 
     query = f"""
     CREATE TABLE IF NOT EXISTS {table_name} (
@@ -27,6 +33,7 @@ def createUserTable():
     cursor.execute(query)
     db_connection.commit()
 
+    # Insert data
     data_to_insert = []
 
     for user in get_user_ids():
@@ -39,13 +46,29 @@ def createUserTable():
     cursor.executemany(insert_query, data_to_insert)
     db_connection.commit()
 
-    '''
-    print(f"{table_name} Contents")
-    cursor.execute(f"SELECT * FROM {table_name}")
-    rows = cursor.fetchall()
-    print(tabulate(rows, headers=cursor.column_names))
-    '''
+    # Close connection
     connection.close_connection()
+
+
+def create_track_point_table():
+    """
+    Creates 'TrackPointTable' SQL table with the following columns:
+    - 'id' (INT AUTO_INCREMENT NOT NULL PRIMARY KEY)
+    - 'activity_id' (INT NOT NULL FOREIGN KEY)
+    - 'lat' (FLOAT)
+    - 'lon' (FLOAT)
+    - 'altitude' (FLOAT)
+    - 'date_time' (DATETIME)
+    """
+
+    user_ids = get_user_ids()
+
+
+def migrate():
+    print("Migrating...")
+
+    create_user_table()
+
 
 if __name__ == "__main__":
     migrate()
