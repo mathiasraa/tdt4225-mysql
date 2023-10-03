@@ -1,3 +1,4 @@
+from tqdm import tqdm
 from utils.data import (
     get_trajectories_df,
     get_user_ids,
@@ -132,11 +133,14 @@ def create_track_point_table(cursor: MySQLCursor, db_connection: MySQLConnection
 
     # Insert data
     user_ids = get_user_ids()
-    data_to_insert = []
 
-    for user in user_ids:
+    pbar = tqdm(user_ids)
+    for user in pbar:
+        pbar.set_description("Processing TrackPoints of user %s" % user)
         trajectories_df = get_trajectories_df(user)
+        data_to_insert = []
 
+        pbar.set_description("Appending TrackPoints of user %s" % user)
         for _, row in trajectories_df.iterrows():
             data_to_insert.append(
                 (
@@ -148,12 +152,86 @@ def create_track_point_table(cursor: MySQLCursor, db_connection: MySQLConnection
                 )
             )
 
-    insert_query = f"""
-        INSERT INTO {table_name} (activity_id, lat, lon, altitude, date_time)
-        VALUES (%s, %s, %s, %s, %s)
+        pbar.set_description("Migrating TrackPoints of user %s" % user)
+
+        insert_query = f"""
+            INSERT INTO {table_name} (activity_id, lat, lon, altitude, date_time)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.executemany(insert_query, data_to_insert)
+        db_connection.commit()
+
+
+def create_track_point_table_spatial(
+    cursor: MySQLCursor, db_connection: MySQLConnection
+):
     """
-    cursor.executemany(insert_query, data_to_insert)
+    Creates 'TrackPointTable' SQL table with the following columns:
+    - 'id' (INT AUTO_INCREMENT NOT NULL PRIMARY KEY)
+    - 'activity_id' (INT NOT NULL FOREIGN KEY)
+    - 'lat' (FLOAT)
+    - 'lon' (FLOAT)
+    - 'altitude' (FLOAT)
+    - 'date_time' (DATETIME)
+    - 'geom_point' (POINT, a spatial column to store the lon, lat values)
+    """
+
+    # Create table
+    table_name = "TrackPointTable"
+
+    query = f"""
+    CREATE TABLE IF NOT EXISTS {table_name} (
+            id INT AUTO_INCREMENT NOT NULL,
+            activity_id INT NOT NULL,
+            lat FLOAT,
+            lon FLOAT,
+            altitude FLOAT,
+            date_time DATETIME,
+            geom_point POINT NOT NULL,
+            FOREIGN KEY (activity_id) REFERENCES ActivityTable(id),
+            PRIMARY KEY (id)
+        )
+    """
+
+    cursor.execute(query)
+
+    # Add spatial index
+    index_query = f"ALTER TABLE {table_name} ADD SPATIAL INDEX(geom_point)"
+    cursor.execute(index_query)
+
     db_connection.commit()
+
+    # Insert data
+    user_ids = get_user_ids()
+
+    pbar = tqdm(user_ids)
+    for user in pbar:
+        pbar.set_description("Processing TrackPoints of user %s" % user)
+        trajectories_df = get_trajectories_df(user)
+        data_to_insert = []
+
+        pbar.set_description("Appending TrackPoints of user %s" % user)
+        for _, row in trajectories_df.iterrows():
+            data_to_insert.append(
+                (
+                    row["activity_id"],
+                    row["latitude"],
+                    row["longitude"],
+                    row["altitude"],
+                    row["date_time"],
+                    row["longitude"],
+                    row["latitude"],
+                )
+            )
+
+        pbar.set_description("Migrating TrackPoints of user %s" % user)
+
+        insert_query = f"""
+            INSERT INTO {table_name} (activity_id, lat, lon, altitude, date_time, geom_point)
+            VALUES (%s, %s, %s, %s, %s, POINT(%s, %s))
+        """
+        cursor.executemany(insert_query, data_to_insert)
+        db_connection.commit()
 
 
 def migrate():
@@ -165,7 +243,7 @@ def migrate():
 
     create_user_table(cursor, db_connection)
     create_activity_table(cursor, db_connection)
-    create_track_point_table(cursor, db_connection)
+    create_track_point_table_spatial(cursor, db_connection)
 
     # Close connection
     connection.close_connection()

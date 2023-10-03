@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 from numpy import loadtxt
+import warnings
 import os
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data_path = dir_path + "/../../data/Data"
@@ -100,8 +103,20 @@ def get_trajectories_df(user_id: str):
         if activities.empty:
             return trajectories
 
+        # Get the start dates of the activities as strings
+        start_dates = [
+            start_date
+            for start_date in activities["start_date_time"]
+            .dt.date.astype(str)
+            .values.tolist()
+        ]
+
         # Loop through the files in the Trajectory folder
         for name in files:
+            # Check if the trajectory file is in the date of an activity
+            if f"{name[:4]}-{name[4:6]}-{name[6:8]}" not in start_dates:
+                continue
+
             trajectory = pd.read_csv(
                 f"{data_path}/{user_id}/Trajectory/{name}",
                 names=[
@@ -126,6 +141,8 @@ def get_trajectories_df(user_id: str):
             # Add trajectory to trajectories dataframe
             trajectories = pd.concat([trajectories, trajectory])
 
+        print(f"Relating {trajectories.shape[0]} track points to activities...")
+
         # Create an empty list to store selected trajectories
         selected_trajectories = []
 
@@ -136,12 +153,23 @@ def get_trajectories_df(user_id: str):
             )
             trajectory = trajectories.copy()[mask]
 
-            if not trajectory.empty:
+            if not trajectory.empty and trajectory.shape[0] <= 2500:
                 trajectory["activity_id"] = activity["id"]
                 selected_trajectories.append(trajectory)
 
         # Concatenate the selected trajectories into a single DataFrame
-        trajectories = pd.concat(selected_trajectories)
-        trajectories = trajectories.reset_index(drop=True)
+        if len(selected_trajectories) > 0:
+            trajectories = pd.concat(selected_trajectories)
+            trajectories = trajectories.reset_index(drop=True)
 
-        return trajectories
+            return trajectories
+        else:
+            return pd.DataFrame(
+                columns=[
+                    "latitude",
+                    "longitude",
+                    "altitude",
+                    "date_time",
+                    "activity_id",
+                ]
+            )
