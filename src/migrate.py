@@ -86,8 +86,8 @@ def create_activity_table(cursor: MySQLCursor, db_connection: MySQLConnection):
                 (
                     row["id"],
                     row["user_id"],
-                    row["start_date_time"].strftime('%Y-%m-%d %H:%M:%S'),
-                    row["end_date_time"].strftime('%Y-%m-%d %H:%M:%S'),
+                    row["start_date_time"].strftime("%Y-%m-%d %H:%M:%S"),
+                    row["end_date_time"].strftime("%Y-%m-%d %H:%M:%S"),
                     row["transportation_mode"],
                 )
             )
@@ -148,7 +148,7 @@ def create_track_point_table(cursor: MySQLCursor, db_connection: MySQLConnection
                     row["latitude"],
                     row["longitude"],
                     row["altitude"],
-                    row["date_time"].strftime('%Y-%m-%d %H:%M:%S'),
+                    row["date_time"].strftime("%Y-%m-%d %H:%M:%S"),
                 )
             )
 
@@ -233,12 +233,13 @@ def create_track_point_table_spatial(
         cursor.executemany(insert_query, data_to_insert)
         db_connection.commit()
 
+
 def drop_tables(cursor: MySQLCursor, db_connection: MySQLConnection):
     """
     Drops the specified tables from the database.
     """
 
-    tables = ['TrackPointTable', 'ActivityTable', 'UserTable']
+    tables = ["TrackPointTable", "ActivityTable", "UserTable"]
 
     for table in tables:
         query = f"DROP TABLE IF EXISTS {table};"
@@ -246,7 +247,6 @@ def drop_tables(cursor: MySQLCursor, db_connection: MySQLConnection):
         db_connection.commit()
 
     print("Tables dropped successfully.")
-
 
 
 def migrate():
