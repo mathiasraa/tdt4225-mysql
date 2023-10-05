@@ -3,12 +3,12 @@ import numpy as np
 
 def haversine_np(lon1, lat1, lon2, lat2):
     """
-    Calculate the great circle distance between two points
-    on the earth (specified in decimal degrees)
+    Calculate the great circle distance between two points using haversine function.
+    Vectorized version of the haversine distance for numpy arrays.
 
-    All args must be of equal length.
-
+    Fetched from https://stackoverflow.com/a/29546836
     """
+
     lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
 
     dlon = lon2 - lon1
@@ -18,4 +18,5 @@ def haversine_np(lon1, lat1, lon2, lat2):
 
     c = 2 * np.arcsin(np.sqrt(a))
     km = 6378.137 * c
+
     return km
