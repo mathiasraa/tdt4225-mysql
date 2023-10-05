@@ -267,5 +267,4 @@ def migrate():
 
 
 if __name__ == "__main__":
-    #migrate()
-    print(get_trajectories_df('010'))
+    migrate()
