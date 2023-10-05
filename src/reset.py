@@ -19,7 +19,6 @@ def reset():
 
     print("Database sucessfully reset.")
 
-    # Close connection
     connection.close_connection()
 
 
